@@ -1,0 +1,9 @@
+#TestNodeServer
+test_node_server:
+  container_name: TestNodeServer
+  build: .
+  ports:
+   - "3000:3000"
+  volumes:
+   - /var/log/testnodeserver
+  
