@@ -4,9 +4,21 @@ var app = express();
 var bodyParser = require('body-parser');
 
 var redis = require('redis');
-var redis_client = redis.createClient();
 
-var sleep = require('sleep');
+//***************************
+// Setting Up the Redis Client
+//****************************
+
+var listen_port = process.env.NODE_SERVER_PORT;
+
+if(process.env.REDIS_HOST && process.env.REDIS_PORT) { 
+     	var redis_client = redis.createClient(process.env.REDIS_PORT,process.env.REDIS_HOST);
+}
+else { 
+    	var redis_client = redis.createClient();
+}
+
+//var sleep = require('sleep');
 
 var jsonString = 'customer: {phone: 99999999,name: test_user_%s,email_id: test_%s@test.com,customer_type: repeat}';
 
@@ -48,21 +60,9 @@ app.post('/user/:id', function (req, res) {
 // Functional Testing
 //***********************************************
 
-// POST - Persist the json request to redis
-app.post('/functional/user/:id', function (req, res) {
-	var key = Number(req.params.id);
-	var post_json = JSON.stringify(req.body);
-	console.log(post_json);
-	redis_client.set(key,post_json, function(err, reply) {
-    	console.log(reply);
-	console.log(err);
-	res.status(201).send();
-	});
-	
-});
 
 // GET - Search for the user in redis and revert
-app.get('/functional/user/:id', function (req, res) {
+app.get('/user-functional/:id', function (req, res) {
   
     	res.setHeader('Content-Type', 'application/json');
 	redis_client.get(Number(req.params.id), function(err, reply) {
@@ -100,7 +100,7 @@ app.get('/user-params/', function (req, res) {
 app.get('/user-lag/:id', function (req, res) {
   	console.log(req.body)
 	console.log(req.headers)
-	sleep.sleep(86400)
+	//sleep.sleep(86400)
     	res.setHeader('Content-Type', 'application/json');
 	var jsonResponse = { customer: { name: "test_user_"+req.params.id,phone: 99999999,email : "test_"+req.params.id+"@test.com",customer_type: "repeat"}}
         res.send(jsonResponse);	
@@ -122,7 +122,7 @@ function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-app.listen(3000, function () {
-  console.log('Example app listening on port 3000!');
+app.listen(listen_port, function () {
+  console.log('Example app listening on port: '+listen_port);
 });
 

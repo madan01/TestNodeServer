@@ -1,6 +1,13 @@
+redis:
+  image: redis
+  ports:
+    - "6379:6379"
+
 #TestNodeServer
 test_node_server:
   container_name: TestNodeServer
+  links: 
+    - redis
   build: .
   ports:
    - "3000:3000"
